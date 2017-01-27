@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cuiabá - Mapa de Calor dos Pontos de Obras Identificados</title>
+  <meta charset="utf-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+
+  <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+  <script type="text/javascript" src="L.SimpleGraticule.js"></script>
+  
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    html, body, #map {
+      height: 100%;
+    }
+
+    .leaflet-grid-label .gridlabel-vert {
+        margin-left: 8px;
+        -webkit-transform: rotate(90deg);
+        transform: rotate(90deg);
+    }
+    .leaflet-grid-label .gridlabel-vert,
+    .leaflet-grid-label .gridlabel-horiz {
+        padding-left:2px;
+        font-weight: bold;
+        text-shadow: -2px 0 #FFFFFF, 0 2px #FFFFFF, 2px 0 #FFFFFF, 0 -2px #FFFFFF;
+    }
+
+    .info { 
+      padding: 6px 8px; 
+      font: 14px/16px Arial, Helvetica, sans-serif; 
+      background: white; 
+      background: rgba(255,255,255,0.8); 
+      box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+      border-radius: 5px; 
+    } 
+    .info h4 { 
+      margin: 0 0 5px; 
+      color: #777; 
+    }
+
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <script>
+    var map = L.map('map', {zoomControl: false, zoom: 12, center: [-15.597821, -56.094979], attributionControl: false });
+
+    L.TileLayer.CacheS3 = L.TileLayer.extend({
+      getTileUrl: function(coord) {
+        return 'http://tiles-mt.projenet.net.br.s3.amazonaws.com/sentinel2-2016/L' + addLeadingZeroLevel(coord.z) + '/R' + addLeadingZero(coord.y) + '/C' + addLeadingZero(coord.x) + '.jpg';
+      },
+      getAttribution: function() {
+        return '';
+      },
+      maxZoom: 15
+    });
+
+    /*L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      maxZoom: 15,
+      attribution: ''
+    }).addTo(map);*/
+
+    L.tileLayer.CacheS3 = function() {
+      return new L.TileLayer.CacheS3();
+    }
+
+    L.tileLayer.CacheS3().addTo(map);
+
+    var layerWMS = L.tileLayer.wms('http://wms.geocloud.com.br:8080/geoserver/wms', {
+      layers: 'semamt:TERRA_INDIGENA',
+      tiled: true,
+      format: 'image/png',
+      transparent: true,
+      minZoom: 0,
+      maxZoom: 15,
+      zIndex: 1,
+      continuousWorld: true
+    });
+
+    layerWMS.addTo(map);
+
+    var zoomIntervals = [];
+    var zoomIntervalBase = 204.8;
+
+    for(i =0; i< 21; i++) {
+      zoomIntervals.push({start: i, end: i+1, interval: zoomIntervalBase});
+      zoomIntervalBase = zoomIntervalBase/2;
+    }
+
+    var options = {
+      interval: 20,
+      showshowOriginLabel: true,
+      redraw: 'move',
+      zoomIntervals: zoomIntervals
+    };
+  
+    L.simpleGraticule(options).addTo(map);
+
+    var info = L.control();
+
+    info.onAdd = function (map) {
+      this._div = L.DomUtil.create('div', 'info');
+      this.update();
+      return this._div;
+    };
+
+    info.update = function (props) {
+      this._div.innerHTML = '<h4>ZOOM: '+ map.getZoom() +' BBOX: ' + map.getBounds().toBBoxString() + ' </h4>';
+    };
+
+    //info.addTo(map);
+
+    L.control.scale().addTo(map);
+
+    /* map.on("moveend", function () {
+      info.update();
+    });
+
+    map.on("zoomend", function () {
+      info.update();
+    }); */
+
+    function addLeadingZero(n) {
+        var out = n.toString(16);
+
+        switch (out.length) {
+          case 1:
+            out = "0000000" + out;
+            break;
+          case 2:
+            out = "000000" + out;
+            break;
+          case 3:
+            out = "00000" + out;
+            break;
+          case 4:
+            out = "0000" + out;
+            break;
+          case 5:
+            out = "000" + out;
+            break;
+          case 6:
+            out = "00" + out;
+            break;
+          case 7:
+            out = "0" + out;
+            break;
+        }
+
+        return out;
+      }
+
+      function addLeadingZeroLevel(n) {
+        var out = String(n);
+
+        if (out.length == 1) {
+          out = "0" + out;
+        } else if (out.length == 2) {
+          out = out;
+        }
+
+        return out;
+      }
+
+
+  </script>
+</body>
+</html>
