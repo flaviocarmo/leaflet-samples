@@ -1,4 +1,4 @@
-L.TileLayer.Fallback = L.TileLayer.extend({
+L.TileLayer.Fallback.AGS = L.TileLayer.extend({
 
   options: {
     minNativeZoom: 0
@@ -141,9 +141,7 @@ L.TileLayer.Fallback = L.TileLayer.extend({
 
 });
 
-
-
 // Supply with a factory for consistency with Leaflet.
-L.tileLayer.fallback = function (urlTemplate, options) {
-  return new L.TileLayer.Fallback(urlTemplate, options);
+L.tileLayer.fallback.ags = function (urlTemplate, options) {
+  return new L.TileLayer.Fallback.AGS(urlTemplate, options);
 };
