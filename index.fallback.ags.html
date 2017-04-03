@@ -41,7 +41,7 @@ CAR Consolidado         semamt:CAR_CONSOLIDADO
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
 
   <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
-  <script src="fallback.js"></script>
+  <script src="fallback.ags.js"></script>
   
   <style>
     body {
@@ -60,7 +60,7 @@ CAR Consolidado         semamt:CAR_CONSOLIDADO
   <script>
     var map = L.map('map').setView([-15.597821, -56.094979], 12);
 
-    var myTileLayer = L.tileLayer.fallback('http://tiles-mt.projenet.net.br.s3.amazonaws.com/sentinel2-2016');
+    var myTileLayer = L.tileLayer.fallbackags('http://tiles-mt.projenet.net.br.s3.amazonaws.com/sentinel2-2016');
 
     myTileLayer.addTo(map);
   </script>

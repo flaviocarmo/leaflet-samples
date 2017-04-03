@@ -1,47 +1,17 @@
-<!--
-Fundos
-
-SRTM 30m           http://tiles-mt.projenet.net.br.s3.amazonaws.com/srtm-30m-sema
-LandSat5 - 2000    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat5-2000
-LandSat5 - 2005    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat5-2005
-LandSat5 - 2006    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat5-2006
-LandSat5 - 2007    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat5-2007
-LandSat5 - 2008    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat5-2008-sema
-LandSat5 - 2009    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat5-2009
-LandSat5 - 2010    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat5-2010
-LandSat5 - 2011    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat5-2011
-RapidEye - 2011    http://tiles-mt.projenet.net.br.s3.amazonaws.com/rapideye-2011
-ResourceSat - 2012 http://tiles-mt.projenet.net.br.s3.amazonaws.com/resourcesat-2012
-LandSat8 - 2013    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat8-2013
-LandSat8 - 2014    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat8-2014
-LandSat8 - 2015    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat8-2015-sema
-LandSat8 - 2016    http://tiles-mt.projenet.net.br.s3.amazonaws.com/landsat8-2016
-Sentinel2 - 2016   http://tiles-mt.projenet.net.br.s3.amazonaws.com/sentinel2-2016
-
-WMS - http://wms.geocloud.com.br:8080/geoserver/wms
-
-Terras Indígenas        semamt:TERRA_INDIGENA
-Unidades de Conservação semamt:UNIDADES_CONSERVACAO
-Uso Restrito Pantanal   semamt:USO_RESTRITO_PANT
-Uso Consolidado         semamt:USO_CONSOLIDADO
-Curso de Água           semamt:CURSO_DE_AGUA
-Massa de Água           semamt:MASSA_DE_AGUA
-Mancha Urbana           semamt:MANCHA_URBANA
-CAR Consolidado         semamt:CAR_CONSOLIDADO
-
--->
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Cuiabá - Mapa de Calor dos Pontos de Obras Identificados</title>
+  <title>Leaflet.zoominfo</title>
   <meta charset="utf-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
-
   <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
-  
+
+  <link rel="stylesheet" href="L.Control.Zoominfo.css" />
+  <script src="L.Control.Zoominfo.js" ></script>
+  <script src="fallback.ags.js"></script>
+
   <style>
     body {
       padding: 0;
@@ -51,90 +21,24 @@ CAR Consolidado         semamt:CAR_CONSOLIDADO
     html, body, #map {
       height: 100%;
     }
+
+
   </style>
 </head>
 <body>
   <div id="map"></div>
   
   <script>
-    var map = L.map('map').setView([-15.597821, -56.094979], 12);
-
-    L.TileLayer.CacheS3 = L.TileLayer.extend({
-      getTileUrl: function(coord) {
-        return 'http://tiles-mt.projenet.net.br.s3.amazonaws.com/sentinel2-2016/L' + addLeadingZeroLevel(coord.z) + '/R' + addLeadingZero(coord.y) + '/C' + addLeadingZero(coord.x) + '.jpg';
-      },
-      getAttribution: function() {
-        return 'Powered by <a href="http://www.geocloud.com.br">Geocloud</a>';
-      },
-      maxZoom: 15
+    var map = L.map('map', {
+      zoominfoControl: true,
+      zoomControl: false,
+      zoom: 12, 
+      center: [-15.597821, -56.094979], 
+      attributionControl: false 
     });
 
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-      maxZoom: 15,
-      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
-    }).addTo(map);
-
-    L.tileLayer.CacheS3 = function() {
-      return new L.TileLayer.CacheS3();
-    }
-
-    L.tileLayer.CacheS3().addTo(map);
-
-    var layerWMS = L.tileLayer.wms('http://wms.geocloud.com.br:8080/geoserver/wms', {
-      layers: 'semamt:TERRA_INDIGENA',
-      tiled: true,
-      format: 'image/png',
-      transparent: true,
-      minZoom: 0,
-      maxZoom: 15,
-      zIndex: 1,
-      continuousWorld: true
-    });
-
-    layerWMS.addTo(map);
-
-    function addLeadingZero(n) {
-        var out = n.toString(16);
-
-        switch (out.length) {
-          case 1:
-            out = "0000000" + out;
-            break;
-          case 2:
-            out = "000000" + out;
-            break;
-          case 3:
-            out = "00000" + out;
-            break;
-          case 4:
-            out = "0000" + out;
-            break;
-          case 5:
-            out = "000" + out;
-            break;
-          case 6:
-            out = "00" + out;
-            break;
-          case 7:
-            out = "0" + out;
-            break;
-        }
-
-        return out;
-      }
-
-      function addLeadingZeroLevel(n) {
-        var out = String(n);
-
-        if (out.length == 1) {
-          out = "0" + out;
-        } else if (out.length == 2) {
-          out = out;
-        }
-
-        return out;
-      }
-
+    var myTileLayer = L.tileLayer.fallbackags('http://storage2/sentinel2-2016');
+    myTileLayer.addTo(map);
 
   </script>
 </body>
